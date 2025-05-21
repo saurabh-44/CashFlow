@@ -1,28 +1,60 @@
-.navbar {
+.header {
+  background: var(--card-background);
+  padding: 0 2rem;
+  box-shadow: var(--shadow-sm);
   position: sticky;
-  width: 100%;
-  padding: 0.75rem 1.5rem;
-  background-color: var(--theme);
+  top: 0;
+  z-index: 1000;
+  transition: background 0.3s;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 100%;
 }
 
-.navbar-heading {
-  color: #fff;
-  font-weight: 500;
-  margin: 0px;
-  font-size: 1.2rem;
-}
-.navbar-link {
-  color: #e3e3e3;
-  font-weight: 500;
-  margin: 0px;
-  font-size: 1rem;
-  cursor: pointer;
+.logo {
+  display: flex;
+  align-items: center;
 }
 
-.navbar-link:hover {
-  color: #fff;
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.theme-toggle-btn {
+  color: var(--primary-color);
+  background: var(--surface-color);
+  border-radius: var(--radius-md);
+  border: none;
+  font-weight: 500;
   transition: all 0.3s;
+  margin-right: 0.5rem;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--secondary-color);
+  background: var(--background-color);
+}
+
+.logout-button {
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  color: var(--error-color);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 1rem;
+  }
 }

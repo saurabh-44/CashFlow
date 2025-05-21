@@ -7,19 +7,18 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import Header from "./Header";
+import { Form, Input, Button, Card, Typography, Divider, Space, message } from "antd";
+import { GoogleOutlined, MailOutlined, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 
+const { Title, Text } = Typography;
+
 const SignUpSignIn = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [flag, setFlag] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);
   const navigate = useNavigate();
 
-  const createUserDocument = async (user) => {
+  const createUserDocument = async (user, userName = '') => {
     setLoading(true);
     if (!user) return;
 
@@ -32,9 +31,9 @@ const SignUpSignIn = () => {
 
       try {
         await setDoc(userRef, {
-          name: displayName ? displayName : name,
+          name: displayName || userName || email.split('@')[0],
           email,
-          photoURL: photoURL ? photoURL : "",
+          photoURL: photoURL || "",
           createdAt,
         });
         toast.success("Account Created!");
@@ -47,198 +46,143 @@ const SignUpSignIn = () => {
     }
   };
 
-  const signUpWithEmail = async (e) => {
+  const onFinish = async (values) => {
     setLoading(true);
-    e.preventDefault();
     try {
-      const result = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = result.user;
-      await createUserDocument(user);
-      toast.success("Successfully Signed Up!");
-      setLoading(false);
-      navigate("/dashboard");
+      if (isLogin) {
+        const result = await signInWithEmailAndPassword(auth, values.email, values.password);
+        navigate("/dashboard");
+        toast.success("Logged In Successfully!");
+      } else {
+        const result = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        await createUserDocument(result.user, values.name);
+        toast.success("Successfully Signed Up!");
+        navigate("/dashboard");
+      }
     } catch (error) {
       toast.error(error.message);
-      console.error(
-        "Error signing up with email and password: ",
-        error.message
-      );
-      setLoading(false);
+      console.error("Error:", error.message);
     }
-  };
-
-  const signInWithEmail = async (e) => {
-    setLoading(true);
-    e.preventDefault();
-    try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      const user = result.user;
-      navigate("/dashboard");
-      toast.success("Logged In Successfully!");
-      setLoading(false);
-    } catch (error) {
-      toast.error(error.message);
-      console.error(
-        "Error signing in with email and password: ",
-        error.message
-      );
-      setLoading(false);
-    }
+    setLoading(false);
   };
 
   const signInWithGoogle = async () => {
     setLoading(true);
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      await createUserDocument(user);
+      await createUserDocument(result.user);
       toast.success("User Authenticated Successfully!");
-      setLoading(false);
       navigate("/dashboard");
     } catch (error) {
-      setLoading(false);
       toast.error(error.message);
       console.error("Error signing in with Google: ", error.message);
     }
+    setLoading(false);
   };
 
   return (
-    <>
-      <Header />
-      <div className="wrapper">
-        {flag ? (
-          <div className="signup-signin-container">
-            <h2 style={{ textAlign: "center" }}>
-              Log In on <span className="blue-text">CashFlow.</span>
-            </h2>
-            <form onSubmit={signUpWithEmail}>
-              <div className="input-wrapper">
-                <p>Email</p>
-                <input
-                  type="email"
-                  placeholder="JohnDoe@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+    <div className="auth-container">
+      <Card className="auth-card">
+        <div className="auth-header">
+          <Title level={2} style={{ margin: 0, color: "var(--primary-color)" }}>
+            CashFlow
+          </Title>
+          <Text type="secondary">
+            {isLogin ? "Welcome back! Please login to your account." : "Create your account to get started."}
+          </Text>
+        </div>
 
-              <div className="input-wrapper">
-                <p>Password</p>
-                <input
-                  type="password"
-                  placeholder="Example123"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-
-              <button
-                disabled={loading}
-                className="btn"
-                onClick={signInWithEmail}
-              >
-                {loading ? "Loading..." : " Log In with Email and Password"}
-              </button>
-            </form>
-            <p style={{ textAlign: "center", margin: 0 }}>or</p>
-            <button
-              disabled={loading}
-              className="btn btn-blue"
-              onClick={signInWithGoogle}
+        <Form
+          name="auth"
+          onFinish={onFinish}
+          layout="vertical"
+          size="large"
+          className="auth-form"
+        >
+          {!isLogin && (
+            <Form.Item
+              name="name"
+              rules={[{ required: true, message: "Please input your name!" }]}
             >
-              {loading ? "Loading..." : " Log In with Google"}
-            </button>
-            <p
-              onClick={() => setFlag(!flag)}
-              style={{
-                textAlign: "center",
-                marginBottom: 0,
-                marginTop: "0.5rem",
-                cursor: "pointer",
-              }}
-            >
-              Or Don't Have An Account? Click Here.
-            </p>
-          </div>
-        ) : (
-          <div className="signup-signin-container">
-            <h2 style={{ textAlign: "center" }}>
-              Sign Up on <span className="blue-text">CashFlow..</span>
-            </h2>
-            <form onSubmit={signUpWithEmail}>
-              <div className="input-wrapper">
-                <p>Full Name</p>
-                <input
-                  type="text"
-                  placeholder="John Doe"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-              <div className="input-wrapper">
-                <p>Email</p>
-                <input
-                  type="email"
-                  placeholder="JohnDoe@gmail.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+              <Input prefix={<UserOutlined />} placeholder="Full Name" />
+            </Form.Item>
+          )}
 
-              <div className="input-wrapper">
-                <p>Password</p>
-                <input
-                  type="password"
-                  placeholder="Example123"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
+          <Form.Item
+            name="email"
+            rules={[
+              { required: true, message: "Please input your email!" },
+              { type: "email", message: "Please enter a valid email!" }
+            ]}
+          >
+            <Input prefix={<MailOutlined />} placeholder="Email" />
+          </Form.Item>
 
-              <div className="input-wrapper">
-                <p>Confirm Password</p>
-                <input
-                  type="password"
-                  placeholder="Example123"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
+          <Form.Item
+            name="password"
+            rules={[
+              { required: true, message: "Please input your password!" },
+              { min: 6, message: "Password must be at least 6 characters!" }
+            ]}
+          >
+            <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+          </Form.Item>
 
-              <button type="submit" className="btn">
-                {loading ? "Loading..." : "Sign Up with Email and Password"}
-              </button>
-            </form>
-            <p style={{ textAlign: "center", margin: 0 }}>or</p>
-            <button
-              disabled={loading}
-              className="btn btn-blue"
-              onClick={signInWithGoogle}
+          {!isLogin && (
+            <Form.Item
+              name="confirmPassword"
+              dependencies={["password"]}
+              rules={[
+                { required: true, message: "Please confirm your password!" },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error("Passwords do not match!"));
+                  },
+                }),
+              ]}
             >
-              {loading ? "Loading..." : "Sign Up with Google"}
-            </button>
-            <p
-              onClick={() => setFlag(!flag)}
-              style={{
-                textAlign: "center",
-                marginBottom: 0,
-                marginTop: "0.5rem",
-                cursor: "pointer",
-              }}
+              <Input.Password prefix={<LockOutlined />} placeholder="Confirm Password" />
+            </Form.Item>
+          )}
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              loading={loading}
+              className="auth-button"
             >
-              Or Have An Account Already? Click Here
-            </p>
-            {/* <button onClick={signInWithEmail}>
-            Sign In with Email and Password
-          </button> */}
-          </div>
-        )}
-      </div>
-    </>
+              {isLogin ? "Log In" : "Sign Up"}
+            </Button>
+          </Form.Item>
+        </Form>
+
+        <Divider>or</Divider>
+
+        <Button
+          icon={<GoogleOutlined />}
+          onClick={signInWithGoogle}
+          block
+          loading={loading}
+          className="google-button"
+        >
+          Continue with Google
+        </Button>
+
+        <div className="auth-footer">
+          <Text type="secondary">
+            {isLogin ? "Don't have an account?" : "Already have an account?"}
+          </Text>
+          <Button type="link" onClick={() => setIsLogin(!isLogin)}>
+            {isLogin ? "Sign Up" : "Log In"}
+          </Button>
+        </div>
+      </Card>
+    </div>
   );
 };
 

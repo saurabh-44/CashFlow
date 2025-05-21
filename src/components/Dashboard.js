@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Card, Row } from "antd";
+import { Card, Row, Col, Button, Space, Typography } from "antd";
 import { Line, Pie } from "@ant-design/charts";
+import { DownloadOutlined, ReloadOutlined } from "@ant-design/icons";
 import moment from "moment";
 import TransactionSearch from "./TransactionSearch";
 import Header from "./Header";
@@ -15,6 +16,8 @@ import Loader from "./Loader";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { unparse } from "papaparse";
+
+const { Title } = Typography;
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
@@ -153,7 +156,7 @@ const Dashboard = () => {
   async function addTransaction(transaction, many) {
     try {
       const docRef = await addDoc(
-        collection(db, `users/${user.uid}/transactions`),
+        collection(db, `users/₹{user.uid}/transactions`),
         transaction
       );
       console.log("Document written with ID: ", docRef.id);
@@ -171,7 +174,7 @@ const Dashboard = () => {
   async function fetchTransactions() {
     setLoading(true);
     if (user) {
-      const q = query(collection(db, `users/${user.uid}/transactions`));
+      const q = query(collection(db, `users/₹{user.uid}/transactions`));
       const querySnapshot = await getDocs(q);
       let transactionsArray = [];
       querySnapshot.forEach((doc) => {
@@ -222,61 +225,73 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="dashboard-container">
+    <div className="app-container">
       <Header />
-      {loading ? (
-        <Loader />
-      ) : (
-        <>
-          <Cards
-            currentBalance={currentBalance}
-            income={income}
-            expenses={expenses}
-            showExpenseModal={showExpenseModal}
-            showIncomeModal={showIncomeModal}
-            cardStyle={cardStyle}
-            reset={reset}
-          />
+      <main className="main-content">
+        {loading ? (
+          <Loader />
+        ) : (
+          <>
+            <div className="dashboard-header">
+              <Title level={2}>Financial Overview</Title>
+              <Space>
+                <Button 
+                  icon={<DownloadOutlined />} 
+                  onClick={exportToCsv}
+                  type="primary"
+                >
+                  Export CSV
+                </Button>
+                <Button 
+                  icon={<ReloadOutlined />} 
+                  onClick={fetchTransactions}
+                >
+                  Refresh
+                </Button>
+              </Space>
+            </div>
 
-          <AddExpenseModal
-            isExpenseModalVisible={isExpenseModalVisible}
-            handleExpenseCancel={handleExpenseCancel}
-            onFinish={onFinish}
-          />
-          <AddIncomeModal
-            isIncomeModalVisible={isIncomeModalVisible}
-            handleIncomeCancel={handleIncomeCancel}
-            onFinish={onFinish}
-          />
-          {transactions.length === 0 ? (
-            <NoTransactions />
-          ) : (
-            <>
-              <Row gutter={16}>
-                <Card bordered={true} style={cardStyle}>
-                  <h2>Financial Statistics</h2>
-                  <Line {...{ ...balanceConfig, data: balanceData }} />
-                </Card>
+            <Cards
+              currentBalance={currentBalance}
+              income={income}
+              expenses={expenses}
+              showExpenseModal={showExpenseModal}
+              showIncomeModal={showIncomeModal}
+            />
 
-                <Card bordered={true} style={{ ...cardStyle, flex: 0.45 }}>
-                  <h2>Total Spending</h2>
-                  {spendingDataArray.length == 0 ? (
-                    <p>Seems like you haven't spent anything till now...</p>
-                  ) : (
-                    <Pie {...{ ...spendingConfig, data: spendingDataArray }} />
-                  )}
+            <Row gutter={[24, 24]} className="mt-4">
+              <Col xs={24} lg={16}>
+                <Card className="card">
+                  <Title level={4}>Balance History</Title>
+                  <Line {...balanceConfig} />
                 </Card>
-              </Row>
-            </>
-          )}
-          <TransactionSearch
-            transactions={transactions}
-            exportToCsv={exportToCsv}
-            fetchTransactions={fetchTransactions}
-            addTransaction={addTransaction}
-          />
-        </>
-      )}
+              </Col>
+              <Col xs={24} lg={8}>
+                <Card className="card">
+                  <Title level={4}>Spending by Category</Title>
+                  <Pie {...spendingConfig} />
+                </Card>
+              </Col>
+            </Row>
+
+            <Card className="card mt-4">
+              <Title level={4}>Recent Transactions</Title>
+              <TransactionSearch transactions={transactions} />
+            </Card>
+
+            <AddExpenseModal
+              isExpenseModalVisible={isExpenseModalVisible}
+              handleExpenseCancel={handleExpenseCancel}
+              onFinish={onFinish}
+            />
+            <AddIncomeModal
+              isIncomeModalVisible={isIncomeModalVisible}
+              handleIncomeCancel={handleIncomeCancel}
+              onFinish={onFinish}
+            />
+          </>
+        )}
+      </main>
     </div>
   );
 };

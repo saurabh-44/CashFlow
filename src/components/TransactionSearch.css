@@ -1,0 +1,78 @@
+.transaction-search-container {
+  width: 100%;
+  padding: var(--spacing-lg);
+  background: var(--card-background);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-xl);
+  transition: background 0.3s;
+}
+
+.transaction-search-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.transaction-search-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.transaction-search-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.transaction-search-title {
+  margin-bottom: var(--spacing-md);
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.transaction-table {
+  background: var(--card-background) !important;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-md);
+  transition: background 0.3s;
+}
+
+.transaction-table .ant-table-thead > tr > th {
+  background: var(--surface-color) !important;
+  color: var(--text-primary) !important;
+  font-weight: 600;
+  font-size: 1rem;
+  border-bottom: 2px solid var(--border-color) !important;
+}
+
+.transaction-table .ant-table-tbody > tr > td {
+  background: var(--card-background) !important;
+  color: var(--text-primary) !important;
+  font-size: 1rem;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.transaction-table .ant-table-tbody > tr:hover > td {
+  background: var(--surface-color) !important;
+}
+
+@media (max-width: 900px) {
+  .transaction-search-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  .transaction-search-filters, .transaction-search-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+} 

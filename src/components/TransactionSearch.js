@@ -5,6 +5,7 @@ import search from "../assets/search.svg";
 import { parse } from "papaparse";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import "./TransactionSearch.css";
 const { Search } = Input;
 const { Option } = Select;
 
@@ -100,63 +101,29 @@ const TransactionSearch = ({
   }));
 
   return (
-    <div
-      style={{
-        width: "100%",
-        padding: "0rem 2rem",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: "1rem",
-          alignItems: "center",
-          marginBottom: "1rem",
-        }}
-      >
-        <div className="input-flex">
-          <img src={search} width="16" />
-          <input
-            placeholder="Search by Name"
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+    <div className="transaction-search-container">
+      <div className="transaction-search-toolbar">
+        <div className="transaction-search-filters">
+          <div className="input-flex">
+            <img src={search} width="16" alt="search" />
+            <input
+              placeholder="Search by Name"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Select
+            className="select-input"
+            onChange={(value) => setTypeFilter(value)}
+            value={typeFilter}
+            placeholder="Filter"
+            allowClear
+          >
+            <Option value="">All</Option>
+            <Option value="income">Income</Option>
+            <Option value="expense">Expense</Option>
+          </Select>
         </div>
-        <Select
-          className="select-input"
-          onChange={(value) => setTypeFilter(value)}
-          value={typeFilter}
-          placeholder="Filter"
-          allowClear
-        >
-          <Option value="">All</Option>
-          <Option value="income">Income</Option>
-          <Option value="expense">Expense</Option>
-        </Select>
-      </div>
-
-      {/* <Select
-        style={{ width: 200, marginRight: 10 }}
-        onChange={(value) => setSelectedTag(value)}
-        placeholder="Filter by tag"
-        allowClear
-      >
-        <Option value="food">Food</Option>
-        <Option value="education">Education</Option>
-        <Option value="office">Office</Option>
-      </Select> */}
-      <div className="my-table">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-            marginBottom: "1rem",
-          }}
-        >
-          <h2>My Transactions</h2>
-
+        <div className="transaction-search-actions">
           <Radio.Group
             className="input-radio"
             onChange={(e) => setSortKey(e.target.value)}
@@ -166,33 +133,24 @@ const TransactionSearch = ({
             <Radio.Button value="date">Sort by Date</Radio.Button>
             <Radio.Button value="amount">Sort by Amount</Radio.Button>
           </Radio.Group>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "1rem",
-              width: "400px",
-            }}
-          >
-            <button className="btn" onClick={exportToCsv}>
-              Export to CSV
-            </button>
-            <label for="file-csv" className="btn btn-blue">
-              Import from CSV
-            </label>
-            <input
-              onChange={importFromCsv}
-              id="file-csv"
-              type="file"
-              accept=".csv"
-              required
-              style={{ display: "none" }}
-            />
-          </div>
+          <button className="btn" onClick={exportToCsv}>
+            Export to CSV
+          </button>
+          <label htmlFor="file-csv" className="btn btn-blue">
+            Import from CSV
+          </label>
+          <input
+            onChange={importFromCsv}
+            id="file-csv"
+            type="file"
+            accept=".csv"
+            required
+            style={{ display: "none" }}
+          />
         </div>
-
-        <Table columns={columns} dataSource={dataSource} />
       </div>
+      <h2 className="transaction-search-title">My Transactions</h2>
+      <Table columns={columns} dataSource={dataSource} pagination={{ pageSize: 5 }} className="transaction-table" />
     </div>
   );
 };
